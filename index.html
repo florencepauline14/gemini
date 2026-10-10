@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pauli Basubas</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050813;
+  --card: #0C1226;
+  --line: #1D2547;
+  --tx: #F4F6FF;
+  --dim: #9AA3C7;
+  --cy: #22D3FF;
+  --pu: #A62BFF;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tx);
+  font-family: 'Outfit', system-ui, sans-serif;
+  line-height: 1.55;
+  min-height: 100vh;
+  background-image: radial-gradient(circle at 12% 8%, rgba(34,211,255,.10), transparent 32%), 
+                    radial-gradient(circle at 88% 20%, rgba(166,43,255,.14), transparent 32%);
+  overflow-x: hidden;
+}
+
+/* --- Entrance Animation --- */
+#preloader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+#preloader h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--cy), var(--pu));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 20px rgba(34, 211, 255, 0.4));
+  animation: scaleGlow 2.5s ease-out forwards;
+  margin: 0;
+}
+
+@keyframes scaleGlow {
+  0% { transform: scale(0.85); opacity: 0; filter: drop-shadow(0 0 0px rgba(34, 211, 255, 0)); }
+  20% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 30px rgba(34, 211, 255, 0.6)); }
+  100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(166, 43, 255, 0.4)); }
+}
+
+/* Hide main app initially to let preloader shine */
+#app {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+/* --- Starry Background --- */
+.stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .7;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+    radial-gradient(1px 1px at 90px 140px, #fff, transparent),
+    radial-gradient(2px 2px at 160px 70px, #22D3FF, transparent),
+    radial-gradient(1.5px 1.5px at 230px 190px, #fff, transparent),
+    radial-gradient(2px 2px at 60px 220px, #A62BFF, transparent);
+  background-size: 260px 260px;
+  animation: drift 120s linear infinite;
+}
+@keyframes drift { to { background-position: 260px 520px; } }
+@media (prefers-reduced-motion: reduce) { .stars { animation: none; } }
+
+/* --- Top Navigation --- */
+header, main, footer { position: relative; z-index: 1; }
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 18px max(20px, 5vw);
+  border-bottom: 1px solid var(--line);
+  background: rgba(5,8,19,.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.35rem; letter-spacing: .5px; color: var(--tx); text-decoration: none; }
+.logo { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--cy); display: grid; place-items: center; font-size: 1.1rem; }
+
+nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+nav a { color: var(--tx); text-decoration: none; font-weight: 600; font-size: .95rem; padding: 6px 0; border-bottom: 2px solid transparent; transition: all 0.2s; }
+nav a:hover, nav a.on { border-color: var(--cy); color: var(--cy); }
+
+/* --- Slideshow Page Switching --- */
+.page { 
+  display: none; 
+  max-width: 1000px; 
+  margin: 0 auto; 
+  padding: 48px max(20px, 5vw) 80px; 
+  opacity: 0;
+  transform: translateY(15px);
+}
+.page.on { 
+  display: block; 
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+
+@keyframes fadeSlideUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Typography & Buttons --- */
+h1, h2, h3 { line-height: 1.15; margin: 0 0 .5em; }
+h1 { font-size: clamp(2.4rem, 7vw, 4.6rem); font-weight: 800; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; border-bottom: 1px solid var(--line); padding-bottom: 15px; margin-bottom: 30px; }
+h3 { font-size: 1.2rem; font-weight: 600; }
+
+.grad { background: linear-gradient(90deg, var(--cy), var(--pu)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+p { margin: 0 0 1em; max-width: 62ch; }
+.dim { color: var(--dim); }
+
+.btn { display: inline-block; padding: 12px 24px; border-radius: 999px; font: 600 1rem 'Outfit', sans-serif; text-decoration: none; cursor: pointer; border: 2px solid var(--cy); color: var(--tx); background: transparent; transition: 0.2s; }
+.btn.fill { background: linear-gradient(90deg, var(--cy), var(--pu)); border-color: transparent; color: #050813; }
+.btn:hover { filter: brightness(1.15); transform: translateY(-2px); }
+
+/* --- Layouts --- */
+.hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; padding-bottom: 40px; }
+.ph { background: repeating-linear-gradient(45deg, var(--card), var(--card) 12px, #0f1630 12px, #0f1630 24px); border: 1px dashed var(--dim); border-radius: 18px; display: grid; place-items: center; color: var(--dim); text-align: center; padding: 12px; font-size: .9rem; overflow: hidden;}
+.hero .ph { aspect-ratio: 4/5; }
+
+.social { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.social a { border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; color: var(--tx); text-decoration: none; font-size: .95rem; transition: 0.2s; }
+.social a:hover { border-color: var(--pu); background: rgba(166,43,255,.1); }
+
+/* --- Timeline --- */
+.tl { position: relative; margin: 32px 0 0; padding-left: 28px; border-left: 2px solid var(--line); }
+.ev { position: relative; margin-bottom: 34px; display: grid; grid-template-columns: 1fr 200px; gap: 20px; align-items: start; }
+.ev::before { content: ''; position: absolute; left: -37px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: var(--cy); box-shadow: 0 0 0 4px var(--bg); }
+.ev .yr { color: var(--cy); font-weight: 600; font-size: 1.1rem; margin-bottom: 5px; }
+.ev .ph { aspect-ratio: 4/3; }
+
+/* --- Tabs & Lists --- */
+.tabs { display: flex; gap: 8px; margin: 20px 0 24px; }
+.tabs button { font: 600 1rem 'Outfit', sans-serif; color: var(--tx); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 22px; cursor: pointer; transition: 0.2s;}
+.tabs button[aria-selected=true] { border-color: var(--cy); background: rgba(34,211,255,.12); color: var(--cy);}
+
+.list { display: grid; gap: 14px; }
+.item { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 26px; transition: 0.2s;}
+.item:hover { border-color: rgba(34,211,255,.4); }
+.item p { margin: .5em 0 0; color: var(--dim); }
+.item a { color: var(--cy); text-decoration: none; font-weight: 600;}
+.tag { display: inline-block; font-size: .8rem; border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; margin-right: 6px; color: var(--tx); background: rgba(255,255,255,0.05);}
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 22px; cursor: pointer;}
+summary { font-weight: 600; font-size: 1.1rem; color: var(--cy); outline: none;}
+details p { margin: 1em 0 0; color: var(--dim); }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+
+/* --- Modal/Dialog --- */
+dialog { width: min(900px, 94vw); height: 88vh; padding: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--tx); }
+dialog::backdrop { background: rgba(0,0,0,.8); backdrop-filter: blur(4px); }
+dialog .bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line); }
+dialog iframe { width: 100%; height: calc(100% - 58px); border: 0; background: #fff; border-bottom-left-radius: 14px; border-bottom-right-radius: 14px;}
+
+footer { padding: 32px max(20px, 5vw); border-top: 1px solid var(--line); color: var(--dim); font-size: .9rem; text-align: center;}
+
+@media(max-width: 760px) { .hero, .ev { grid-template-columns: 1fr; } .hero .ph { aspect-ratio: 16/10; } }
+</style>
+</head>
+<body>
+
+<!-- Entrance Animation -->
+<div id="preloader">
+  <h1>Pauli Basubas</h1>
+</div>
+
+<div class="stars" aria-hidden="true"></div>
+
+<!-- Main App Wrapper -->
+<div id="app">
+  <header>
+    <a class="brand" href="#home"><span class="logo" aria-hidden="true">☄</span>Pauli Basubas</a>
+    <nav aria-label="Main">
+      <a href="#about">About me</a>
+      <a href="#projects">Projects</a>
+      <a href="#publications">Publications</a>
+      <a href="#resources">Free resources</a>
+      <a href="#collaborate">Collaborate</a>
+      <a href="#shop">What I shop</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HOME SLIDE -->
+    <section class="page" id="home">
+      <div class="hero">
+        <div>
+          <h1>Hi, I'm <span class="grad">Pauli.</span></h1>
+          <p style="font-size:1.25rem; font-weight: 600; color: var(--cy);">Proof it's possible.</p>
+          <p>I'm training to become an astronaut, and I'm sharing everything I've learned about studying abroad so you can start sooner than I did.</p>
+          <p class="dim">Space biologist from Cebu, Philippines. Twelve years of study and research abroad, on scholarships.</p>
+          <div style="margin-top: 30px; display: flex; gap: 15px; flex-wrap: wrap;">
+            <a class="btn fill" href="#about">See my journey</a> 
+            <a class="btn" href="#resources">Free resources</a>
+          </div>
+        </div>
+        <div class="ph">[ Hero photo of Pauli: space / lab / flight suit ]</div>
+      </div>
+      <div class="social" id="soc1" style="justify-content: center; margin-top: 60px; border-top: 1px solid var(--line); padding-top: 40px;"></div>
+    </section>
+
+    <!-- ABOUT SLIDE -->
+    <section class="page" id="about">
+      <h2>About me</h2>
+      <p class="dim" style="font-size: 1.1rem;">From Mandaue City, Cebu to the edge of space, one step at a time.</p>
+      <button class="btn fill" id="cvbtn" style="margin-bottom: 20px;">View my CV</button>
+      
+      <div class="ph" style="aspect-ratio:16/7; margin-bottom: 40px; font-size: 1.2rem;">[ Video placeholder: your story video, embed here ]</div>
+      <div class="tl" id="tl"></div>
+    </section>
+
+    <!-- PROJECTS SLIDE -->
+    <section class="page" id="projects">
+      <h2>Projects</h2>
+      <p class="dim">Building capability in the Philippines and testing life at the edge of space.</p>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-t="cur">Current Missions</button>
+        <button role="tab" aria-selected="false" data-t="past">Past Milestones</button>
+      </div>
+      <div class="list" id="pl"></div>
+    </section>
+
+    <!-- PUBLICATIONS SLIDE -->
+    <section class="page" id="publications">
+      <h2>Publications</h2>
+      <p class="dim">Papers, conference talks and forthcoming work.</p>
+      <a class="btn fill" href="https://www.researchgate.net/" target="_blank" rel="noopener" id="rg" style="margin-bottom: 30px;">See all on ResearchGate</a>
+      <div class="list" id="pubs"></div>
+    </section>
+
+    <!-- RESOURCES SLIDE -->
+    <section class="page" id="resources">
+      <h2>Free resources</h2>
+      <p class="dim">Plain-language answers on space, studying abroad and scholarships. Views are my own, so check they fit your situation.</p>
+      <a class="btn fill" href="faq.html" target="_blank" rel="noopener" style="margin-bottom: 30px;">Open the full FAQ presentation</a>
+      <div class="list">
+        <details><summary>How do I support my child's astronaut dreams?</summary><p>Feed their specific interests early, build discipline through music, get comfortable in water, and keep them moving for 30+ minutes a day.</p></details>
+        <details><summary>How do I get scholarships for college abroad?</summary><p>Ask for free guidance (CAMP PH, Edukasyon.ph, EducationUSA). Look at MEXT, GKS and MOE, and exchanges like Global UGRAD, Erasmus+ and JENESYS.</p></details>
+        <details><summary>How do I apply for Masters or PhD scholarships?</summary><p>Join GradMAP and Pinoy Scientists for step-by-step help. Target Chevening, Fulbright, Erasmus Mundus, Australia Awards, DAAD and DOST-SEI.</p></details>
+        <details><summary>Which space organizations and missions can I join?</summary><p>SGAC, SEDS and SEDS-Philippines, the Mars Society. For analog missions, look at Asclepios, HI-SEAS, LunAres and CHASM-PH.</p></details>
+      </div>
+    </section>
+
+    <!-- COLLABORATE SLIDE -->
+    <section class="page" id="collaborate">
+      <h2>Collaborate</h2>
+      <p class="dim">Backing Filipino science is a good bet. Here is how to work with me.</p>
+      <div class="two" style="margin-top: 30px;">
+        <div class="item">
+          <h3 style="color: var(--cy); font-size: 1.4rem;">Partner with me</h3>
+          <p style="margin-bottom: 25px;">Brand partnerships, sponsorships and project funding for rocketry, analog missions and space education. Paid partnerships are always disclosed.</p>
+          <a class="btn" href="mailto:paulibasubas@gmail.com?subject=Partnership">Start a partnership</a>
+        </div>
+        <div class="item">
+          <h3 style="color: var(--pu); font-size: 1.4rem;">Invite me to speak</h3>
+          <p style="margin-bottom: 25px;">Schools, universities, conferences and community events. Topics: studying abroad, space biology, and how dreams get a method.</p>
+          <a class="btn" href="mailto:paulibasubas@gmail.com?subject=Speaking%20invitation">Send an invitation</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOP SLIDE -->
+    <section class="page" id="shop">
+      <h2>What I shop</h2>
+      <p class="dim">Things I actually use for analog missions, lab work, and life. Links marked affiliate earn me a small commission at no cost to you.</p>
+      <div class="two" style="margin-top: 30px;">
+        <div class="ph" style="aspect-ratio:4/3">[ Product 1: image, name, link ]</div>
+        <div class="ph" style="aspect-ratio:4/3">[ Product 2: image, name, link ]</div>
+        <div class="ph" style="aspect-ratio:4/3">[ Product 3: image, name, link ]</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Science belongs to everyone.</p>
+    © 2026 Florence Pauline Basubas
+  </footer>
+</div>
+
+<!-- CV Modal -->
+<dialog id="cv">
+  <div class="bar">
+    <b style="font-size: 1.2rem;">Curriculum vitae</b>
+    <span>
+      <a class="btn" href="cv.pdf" target="_blank" rel="noopener" style="padding:6px 16px; margin-right: 10px;">Open in new tab</a> 
+      <button class="btn" id="cvx" style="padding:6px 16px">Close</button>
+    </span>
+  </div>
+  <iframe title="CV" src="about:blank"></iframe>
+</dialog>
+
+<script>
+// --- Preloader Logic ---
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const preloader = document.getElementById('preloader');
+    const app = document.getElementById('app');
+    
+    preloader.style.opacity = '0';
+    preloader.style.visibility = 'hidden';
+    
+    app.style.opacity = '1';
+  }, 2600); // Wait for the 2.5s scaleGlow animation to finish
+});
+
+// --- Social Links ---
+const social=["Instagram","TikTok","YouTube","X","LinkedIn","Facebook"];
+document.querySelectorAll('#soc1').forEach(e => e.innerHTML = social.map(s => `<a href="#" target="_blank" rel="noopener">${s}</a>`).join(''));
+
+// --- Timeline Data ---
+const tl=[
+  ["Childhood","Raised in Mandaue City, Cebu. Add your first memory of space, a childhood photo, and what you wanted to be."],
+  ["High school","Cebu Science High School. Add a photo and one line on what you learned."],
+  ["2014","Finalist, Google Science Fair."],
+  ["2015 – 2019","Left for San Francisco on scholarship: Minerva University, Natural Sciences and Social Sciences, magna cum laude."],
+  ["2019","Research at MD Anderson Cancer Center, Houston, on breast cancer."],
+  ["2019 – 2022","Medical affairs and research with Enolink, working with top hospitals in Seoul."],
+  ["2022 – 2024","Master's research in Barcelona: synthetic biology and SARS-CoV-2, Pompeu Fabra University."],
+  ["2023","Zero-gravity flight winner (SGAC and Aurelia Institute). Asia-Pacific Space Leader Award."],
+  ["2024","Space4Youth awardee, United Nations Office for Outer Space Affairs."],
+  ["2025","Analog astronaut: Executive and Medical Officer, Monsaraz Mars Analog Mission, Portugal. Nebula Award, SGAC."],
+  ["2026 – Present","Founding team at Aequa, and building the Cebu Microgravity Consortium. Next: PhD, then the astronaut corps."]
+];
+document.getElementById('tl').innerHTML = tl.map(([y,t]) => `<div class="ev"><div><div class="yr">${y}</div><p>${t}</p></div><div class="ph">[ Photo: ${y} ]</div></div>`).join('');
+
+// --- Projects Data ---
+const proj = {
+  cur: [
+    ["Aequa: magnetoelectric nanoparticles","Strategy and business development lead on the founding team. Non-surgical neuromodulation.","Cambridge, UK (remote)"],
+    ["Cebu Microgravity Consortium","3D-printed random positioning machine for bone cells and red algae, plus short parabolic flights.","Philippines"],
+    ["Satellite payload with ISRO","Coordinating a payload experiment launching October 2026.","In progress"],
+    ["Rocketry R&D and space education platform","Passion projects, supported by crowdfunding. Looking for formal partners.","Philippines"]
+  ],
+  past: [
+    ["Parabolic flight experiments","Low-cost space biology payload; E. coli survival and skin microbiome, aboard G-Force One.","2024"],
+    ["Monsaraz Mars Analog Mission","Microgreens in Martian regolith and DNA analysis of regolith samples.","2025"],
+    ["Philippine Can Satellite Rocket Competition","Organized the first edition.","2025"],
+    ["Barcelona Zero-Gravity Challenge","Shear-thickening fluid as a cushion in microgravity.","2024"],
+    ["Solar-Microbial Intelligent Lunar Energy System","Finalist, International Space Solar Power Student Competition.","2025"],
+    ["SARS-CoV-2 spike thesis","High-throughput synthetic biology platforms, Translational Synthetic Lab, Pompeu Fabra.","2022 – 2024"]
+  ]
+};
+const pl = document.getElementById('pl');
+function showP(k) {
+  pl.innerHTML = proj[k].map(([a,b,c]) => `<div class="item"><h3 style="color: var(--cy);">${a}</h3><p>${b}</p><p style="margin-top: 15px;"><span class="tag">${c}</span></p></div>`).join('');
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.t === k));
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => showP(b.dataset.t));
+showP('cur');
+
+// --- Publications Data ---
+const gs = q => 'https://scholar.google.com/scholar?q=' + encodeURIComponent(q);
+const pubs = [
+  ["Computational design and evaluation of peptides to target SARS-CoV-2 spike–ACE2 interaction","Molecules, 2025","https://doi.org/10.3390/molecules30081750","Journal article"],
+  ["Low-cost payload for space biology experiments in parabolic flights","75th International Astronautical Congress, Milan, 2024","https://iafastro.directory/iac/browse/IAC-24/A2/IPB","Conference"],
+  ["Spaceflight environment effects on human skin microbiome","IAC 2024 (with J. Puig)",gs("Spaceflight environment effects on human skin microbiome Puig Basubas"),"Conference"],
+  ["Escherichia coli survival and adaptation in simulated spaceflight conditions","IAC 2024 (with J. Puig)",gs("Escherichia coli survival and adaptation in simulated spaceflight conditions Puig Basubas"),"Conference"],
+  ["Shear-thickening fluid as a cushion for force absorption in microgravity","76th IAC, Sydney, 2024 (Barcelona Zero-Gravity Challenge)",gs("Barcelona Zero-Gravity Challenge 2024 shear-thickening fluid cushion Baldono Basubas"),"Conference"],
+  ["Directed evolution of SARS-CoV-2 spike protein reveals determinants of fusion route and syncytia formation","37th International Conference on Antiviral Research, 2024",gs("Directed Evolution of SARS-CoV-2 Spike Protein Reveals Determinants of Fusion Route and Syncytia Formation Rahmeh Basubas"),"Conference"],
+  ["Framework for regional cooperation in space medicine and biology research in Asia-Pacific","73rd IAC, Paris, 2022",gs("Framework for Regional Cooperation Capacity-building Competitiveness Space Medicine Biology Asia-Pacific Basubas"),"Conference"],
+  ["A framework for Mars sample return: who gets access","73rd IAC, Paris, 2022",gs("A Framework for Mars Sample Return: Who Gets Access and What Issues Must Be Addressed"),"Conference"],
+  ["Strengthening cooperation for global health: AI ethical framework for space medicine","72nd IAC, Dubai, 2021",gs("Strengthening cooperation for global health AI ethical framework space medicine Antoniadou Basubas"),"Conference"],
+  ["High-throughput synthetic biology platforms for virus-host interaction of SARS-CoV-2","Master's thesis, forthcoming",gs("Basubas SARS-CoV-2 virus-host interaction high-throughput synthetic biology"),"Forthcoming"],
+  ["Evolution of biological space ecosystem research","Forthcoming",gs("Toring Basubas biological space ecosystem research"),"Forthcoming"],
+  ["Systematic review on the effects of spaceflight on cardiovascular outcomes","Forthcoming",gs("systematic review spaceflight cardiovascular outcomes Neset Komarova"),"Forthcoming"]
+];
+document.getElementById('pubs').innerHTML = pubs.map(([t,v,u,k]) => `<div class="item"><span class="tag">${k}</span><h3 style="margin-top:12px"><a href="${u}" target="_blank" rel="noopener">${t}</a></h3><p>${v}</p></div>`).join('');
+
+// --- CV Modal Logic ---
+const cv = document.getElementById('cv');
+document.getElementById('cvbtn').onclick = () => { cv.querySelector('iframe').src = '2026 BASUBAS_CV_Updated September.pdf'; cv.showModal(); };
+document.getElementById('cvx').onclick = () => cv.close();
+
+// --- Routing (Slideshow effect) ---
+function route() {
+  const id = (location.hash || '#home').slice(1);
+  const ok = document.getElementById(id) ? id : 'home';
+  
+  // Toggle the active page class to trigger the CSS animation
+  document.querySelectorAll('.page').forEach(p => {
+    if (p.id === ok) {
+      p.classList.add('on');
+    } else {
+      p.classList.remove('on');
+    }
+  });
+  
+  // Highlight active nav link
+  document.querySelectorAll('nav a').forEach(a => {
+    a.classList.toggle('on', a.getAttribute('href') === '#' + ok);
+  });
+  
+  // Scroll to top of the page smoothly when switching tabs
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
